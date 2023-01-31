@@ -1,6 +1,10 @@
 package Controller
 
 import (
+	"fmt"
+	"os/exec"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,16 +21,41 @@ func (dockerPush *DockerPush) GetToken(context *gin.Context) {
 	//
 	Command := fmt.Sprintf("docker pull %s ", imageurl)
 	output, err := exec.Command("cmd", "-c", Command).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(output))
 	//
-	Command := fmt.Sprintf("docker tag %s  %s", imageurl, harborurl)
-	output, err := exec.Command("cmd", "-c", Command).Output()
+	Command = fmt.Sprintf("docker tag %s  %s", imageurl, harborurl)
+	output, err = exec.Command("cmd", "-c", Command).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(output))
 	//
-	Command := fmt.Sprintf("docker push %s", harborurl)
-	output, err := exec.Command("cmd", "-c", Command).Output()
+	Command = fmt.Sprintf("docker push %s", harborurl)
+	output, err = exec.Command("cmd", "-c", Command).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(output))
 	//
-	Command := fmt.Sprintf("docker rmi %s", harborurl)
-	output, err := exec.Command("cmd", "-c", Command).Output()
+	Command = fmt.Sprintf("docker rmi %s", harborurl)
+	output, err = exec.Command("cmd", "-c", Command).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(output))
 	//
-	Command := fmt.Sprintf("docker rmi %s", imageurl)
-	output, err := exec.Command("cmd", "-c", Command).Output()
+	Command = fmt.Sprintf("docker rmi %s", imageurl)
+	output, err = exec.Command("cmd", "-c", Command).Output()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(output))
 }
