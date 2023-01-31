@@ -12,11 +12,12 @@ type DockerPush struct {
 }
 
 func (dockerPush *DockerPush) Router(engine *gin.Engine) {
-	engine.GET("/api/push:imageurl", dockerPush.GetToken)
+	engine.GET("/api/push", dockerPush.GetToken)
 }
 
 func (dockerPush *DockerPush) GetToken(context *gin.Context) {
-	imageurl := context.Param("imageurl")
+
+	imageurl := context.Query("imageurl")
 	harborurl := strings.Replace(imageurl, "192.168.48.36", "172.20.4.89:8899", -1)
 	//
 	Command := fmt.Sprintf("docker pull %s ", imageurl)
