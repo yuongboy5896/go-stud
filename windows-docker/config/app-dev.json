@@ -1,0 +1,7 @@
+{
+  "app_name": "Thpower-docker",
+  "app_mode": "debug",
+  "app_host": "0.0.0.0",
+  "app_port": "8090"
+  
+}
