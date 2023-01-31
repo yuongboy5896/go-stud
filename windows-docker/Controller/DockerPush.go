@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -26,16 +28,16 @@ func (dockerPush *DockerPush) GetToken(context *gin.Context) {
 
 	Command := fmt.Sprintf("docker pull %s ", imageurl)
 	Commandarry := []string{Command}
-	 err := Cmd("cmd", Commandarry)
+	err := Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	
+
 	//
 	Command = fmt.Sprintf("docker tag %s  %s", imageurl, harborurl)
 	Commandarry[0] = Command
-	 err = Cmd("cmd", Commandarry)
+	err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -52,26 +54,26 @@ func (dockerPush *DockerPush) GetToken(context *gin.Context) {
 	//
 	Command = fmt.Sprintf("docker rmi %s", harborurl)
 	Commandarry[0] = Command
-	 err = Cmd("cmd", Commandarry)
+	err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	
+
 	//
 	Command = fmt.Sprintf("docker rmi %s", imageurl)
 	Commandarry[0] = Command
-	 err = Cmd("cmd", Commandarry)
+	err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	
+
 }
 
 func Cmd(commandName string, params []string) error {
 	cmd := exec.Command(commandName, params...)
-	dir := "C:\\Users\\thpower\\Desktop\\push-service"
+	dir := GetCurrentDirectory()
 	fmt.Println("CmdAndChangeDirToFile", dir, cmd.Args)
 	//StdoutPipe方法返回一个在命令Start后与命令标准输出关联的管道。Wait方法获知命令结束后会关闭这个管道，一般不需要显式的关闭该管道。
 	stdout, err := cmd.StdoutPipe()
@@ -126,4 +128,14 @@ func CmdAndChangeDirToShow(dir string, commandName string, params []string) erro
 	}
 	err = cmd.Wait()
 	return err
+}
+func GetCurrentDirectory() string {
+	//返回绝对路径  filepath.Dir(os.Args[0])去除最后一个元素的路径
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//将\替换成/
+	return strings.Replace(dir, "\\", "/", -1)
 }
