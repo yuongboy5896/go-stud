@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/bndr/gojenkins"
 )
@@ -20,12 +24,44 @@ func main() {
 		return
 	}
 	log.Println("Jenkins连接成功")
-	Job, err := jenkins.CopyJob(ctx, "email", "email-test")
-	//
+	file, err := os.Open("config.xml")
 	if err != nil {
-		log.Printf("Job 创建失败, %v\n", err)
+		fmt.Println("读文件失败", err)
 		return
 	}
-	log.Printf("Job 创建成功, %v\n", Job)
+	defer file.Close()
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println("读内容失败", err)
+		return
+	}
+	fmt.Println(string(content))
+	configString := string(content)
 
+	configString = strings.Replace(configString, "##GITURL##", "代码地址", -1)       //代码地址
+	configString = strings.Replace(configString, "##MODULENAME##", "模块中文描述", -1) //模块中文描述
+	configString = strings.Replace(configString, "##BRANCH##", "代码分支", -1)       //代码分支
+	configString = strings.Replace(configString, "##DEPLOY##", "模块英文名称", -1)     //模块英文名称
+	configString = strings.Replace(configString, "##ENV##", "环境地址", -1)          //环境地址
+	configString = strings.Replace(configString, "##NAMESPACE##", "命名空间", -1)    //命名空间
+	configString = strings.Replace(configString, "##IMAGEULR##", "上传镜像地址", -1)   //上传镜像地址
+
+	var del bool
+	getjob, err := jenkins.GetJob(ctx, "test-java-java")
+
+	if getjob != nil {
+		del, err = jenkins.DeleteJob(ctx, "test-java-java")
+		if err != nil && !del {
+			panic(err)
+		}
+
+	}
+	job, err := jenkins.CreateJobInFolder(ctx, configString, "test-java-java")
+	if err != nil {
+		panic(err)
+	}
+
+	if job != nil {
+		fmt.Println("Job has been created in child folder")
+	}
 }

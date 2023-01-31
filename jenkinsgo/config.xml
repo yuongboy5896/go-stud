@@ -1,0 +1,102 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1145.v7f2433caa07f">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@1.8.4"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@1.8.4">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.26">
+      <gitLabConnection></gitLabConnection>
+      <jobCredentialId></jobCredentialId>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <org.jenkinsci.plugins.gitlablogo.GitlabLogoProperty plugin="gitlab-logo@1.0.5">
+      <repositoryName></repositoryName>
+    </org.jenkinsci.plugins.gitlablogo.GitlabLogoProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.90">
+    <script>#!groovy
+pipeline {
+    agent any
+	environment{
+	   REPOSITORY=&quot;##GITURL##&quot;
+		 MODULE=&quot;info-pusher-core&quot;
+		 DESCN=&quot;##MODULENAME##&quot;
+		 SCRIPT_PATH=&quot;/home/work/scirpts&quot;
+		 BRANCH=&quot;##BRANCH##&quot;
+		 DEPLOY=&quot;##DEPLOY##&quot;
+     ENV=&quot;##ENV##&quot;
+     NAMESPACE=&quot;##NAMESPACE##&quot;
+     IMAGEULR=&quot;##IMAGEULR##&quot;
+		 
+	}
+	stages {
+	     stage(&apos;获取代码&apos;){
+		    steps{
+				echo &quot;start fetch code from git:${REPOSITORY}&quot;
+				git branch: &quot;${BRANCH}&quot;, 
+				url: &quot;${REPOSITORY}&quot;
+			}
+		 }
+		 
+		  stage(&apos;编译&apos;){
+		    steps{
+				echo &quot;start compile&quot;	 
+		         sh &quot;mvn clean install -U -Dmaven.test.skip=true&quot;
+			}
+		 }
+		 
+		 stage(&apos;构建镜像&apos;){
+		    steps{
+				echo &quot;start build image&quot;
+				sh &quot;${SCRIPT_PATH}/build-portal.sh  ${MODULE} &apos;info-pusher.jar&apos; &apos;mciroservice&apos;&quot;
+			}
+		 }
+		 
+		 stage(&apos;发布系统&apos;){
+		    steps{
+                echo &quot;start deploy&quot;
+                sh &quot;${SCRIPT_PATH}/deploy-portal.sh &apos;${DEPLOY}&apos; &apos;${DEPLOY}&apos; ${MODULE}&quot;
+			}
+		 }
+	}
+	
+	post {
+            success {
+                	dingtalk (
+                    robot: &apos;2fe6425c-47e1-4c68-a11a-c97bdf41bcbf&apos;,
+                    type: &apos;LINK&apos;,
+                    title: &quot;最小系统发布-后端-发布成功&quot;,
+                    text: [&quot;模块名称:${DESCN}\n&quot;,&quot;${ENV}&quot;],
+                    messageUrl: &apos;http://113.128.186.90:30028/&apos;,
+                    //picUrl: &apos;https://www.picdiet.com/img/photographer_compressed.jpg&apos;,
+                    at:[]
+                   )
+            }
+            failure {
+                	dingtalk (
+                    robot: &apos;2fe6425c-47e1-4c68-a11a-c97bdf41bcbf&apos;,
+                    type: &apos;LINK&apos;,
+                    title: &quot;最小系统发布-后端发布失败&quot;,
+                    text: [&quot;模块名称:${DESCN}\n&quot;,&quot;${ENV}&quot;],
+                    messageUrl: &apos;${BUILD_URL}&apos;,
+                    picUrl: &apos;https://www.picdiet.com/img/photographer_compressed.jpg&apos;,
+                    at:[]
+                   )
+            }
+	}
+
+}</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <authToken>123456</authToken>
+  <disabled>false</disabled>
+</flow-definition>
