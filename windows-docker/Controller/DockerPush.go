@@ -26,48 +26,47 @@ func (dockerPush *DockerPush) GetToken(context *gin.Context) {
 
 	Command := fmt.Sprintf("docker pull %s ", imageurl)
 	Commandarry := []string{Command}
-	output, err := Cmd("cmd", Commandarry)
+	 err := Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(output))
+	
 	//
 	Command = fmt.Sprintf("docker tag %s  %s", imageurl, harborurl)
 	Commandarry[0] = Command
-	output, err = Cmd("cmd", Commandarry)
+	 err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(output))
+
 	//
 	Command = fmt.Sprintf("docker push %s", harborurl)
 	Commandarry[0] = Command
-	output, err = Cmd("cmd", Commandarry)
+	err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(output))
 	//
 	Command = fmt.Sprintf("docker rmi %s", harborurl)
 	Commandarry[0] = Command
-	output, err = Cmd("cmd", Commandarry)
+	 err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(output))
+	
 	//
 	Command = fmt.Sprintf("docker rmi %s", imageurl)
 	Commandarry[0] = Command
-	output, err = Cmd("cmd", Commandarry)
+	 err = Cmd("cmd", Commandarry)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(output))
+	
 }
 
 func Cmd(commandName string, params []string) error {
